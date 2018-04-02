@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 public class Rocket : MonoBehaviour {
+    [SerializeField] float rotationSpeed = 250f;
+    [SerializeField] float mainThrust = 2f;
     Rigidbody rigidbody;
     AudioSource audioSource;
 	// Use this for initialization
@@ -14,13 +16,43 @@ public class Rocket : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        ProcessInput();
+        Rotate();
+        Thrust();
 	}
+    private void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                break;
+            case "Finish":
+                SceneManager.LoadScene(1);
+                break;
+            default:
+                SceneManager.LoadScene(0);
+                break;
+        }
+    }
+    private void Rotate() {
+        rigidbody.freezeRotation = true;
 
-    private void ProcessInput()
+        float rotationVectorMultiplier = rotationSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.D))
+        {
+
+            transform.Rotate(Vector3.back * rotationVectorMultiplier);
+        }
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            transform.Rotate(Vector3.forward * rotationVectorMultiplier);
+        }
+        rigidbody.freezeRotation = false;
+    }
+    private void Thrust()
     {
         if (Input.GetKey(KeyCode.Space)) {
-            rigidbody.AddRelativeForce(Vector3.up);
+            rigidbody.AddRelativeForce(Vector3.up * mainThrust);
             if (!audioSource.isPlaying)
             {
                 audioSource.Play();
@@ -29,20 +61,6 @@ public class Rocket : MonoBehaviour {
                 audioSource.Stop();
             }
         }
-        if (Input.GetKey(KeyCode.W)) {
-            print("Up key");
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            transform.Rotate(Vector3.forward);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            print("down key");
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            transform.Rotate(Vector3.back);
-        }
+
     }
 }
